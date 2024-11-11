@@ -90,16 +90,23 @@ def get_posts():
 
     for post in posts:
         author = User.query.get(post.author_id)
+        
+        # Handle the case where the user does not exist
+        if not author:
+            print(f"Warning: No user found for author_id {post.author_id}")
+            author_name = "Unknown"
+        else:
+            author_name = author.username
+        
         # Only include posts the user is authorized to see
-        if session['is_admin'] or post.author_id == session['user_id']:
+        if session.get('is_admin') or post.author_id == session['user_id']:
             result.append({
                 'id': post.id,
                 'content': post.content,
-                'author': author.username,
+                'author': author_name,
                 'created_at': post.created_at
             })
 
-    # Debug statement to check fetched posts
     print(f"Posts fetched for user {session.get('user_id')}: {result}")
     return jsonify(result), 200
 
