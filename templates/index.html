@@ -11,7 +11,6 @@
     
     <div id="auth-section">
         <!-- Login Form -->
-        <h2>Login</h2>
         <form id="login-form">
             <label for="login-username">Username:</label>
             <input type="text" id="login-username" name="username" required>
@@ -21,29 +20,7 @@
         </form>
 
         <!-- Register Form -->
-        <h2>Register</h2>
         <form id="register-form">
             <label for="register-username">Username:</label>
             <input type="text" id="register-username" name="username" required>
             <label for="register-password">Password:</label>
-            <input type="password" id="register-password" name="password" required>
-            <button type="submit">Register</button>
-        </form>
-
-        <!-- Logout Button -->
-        <button id="logout-button" style="display:none;">Logout</button>
-    </div>
-
-    <div id="blog-section">
-        <h2>Create New Post</h2>
-        <form id="create-post-form">
-            <label for="content">Content:</label>
-            <textarea id="content" name="content" required></textarea>
-            <button type="submit">Create Post</button>
-        </form>
-        <div id="blog-posts"></div>
-    </div>
-
-    <script src="/static/script.js"></script>
-</body>
-</html>

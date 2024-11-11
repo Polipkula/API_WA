@@ -1,27 +1,55 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const logoutButton = document.getElementById('logout-button');
     const createPostForm = document.getElementById('create-post-form');
+    const blogSection = document.getElementById('blog-section');
 
-    loginForm.addEventListener('submit', function(event) {
+    // Initially hide sections
+    createPostForm.style.display = 'none';
+    blogSection.style.display = 'none';
+    logoutButton.style.display = 'none';
+
+    loginForm.addEventListener('submit', function (event) {
         event.preventDefault();
         loginUser();
     });
 
-    registerForm.addEventListener('submit', function(event) {
+    registerForm.addEventListener('submit', function (event) {
         event.preventDefault();
         registerUser();
     });
 
     logoutButton.addEventListener('click', logoutUser);
-    createPostForm.addEventListener('submit', function(event) {
+
+    createPostForm.addEventListener('submit', function (event) {
         event.preventDefault();
         createPost();
     });
 
+    checkLoginStatus(); // Check login status on load and adjust UI
     loadPosts();
 });
+
+function checkLoginStatus() {
+    fetch('/api/check-session', { method: 'GET' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.logged_in) {
+                // Show post creation form and logout button
+                document.getElementById('create-post-form').style.display = 'block';
+                document.getElementById('logout-button').style.display = 'block';
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'none';
+            } else {
+                // Show login and register forms
+                document.getElementById('create-post-form').style.display = 'none';
+                document.getElementById('logout-button').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('register-form').style.display = 'block';
+            }
+        });
+}
 
 function loginUser() {
     const username = document.getElementById('login-username').value;
@@ -32,17 +60,15 @@ function loginUser() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message === 'Login successful') {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('logout-button').style.display = 'block';
-            loadPosts();
-        } else {
-            alert(data.message || 'Login failed');
-        }
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Login successful') {
+                checkLoginStatus();
+                loadPosts();
+            } else {
+                alert(data.message || 'Login failed');
+            }
+        });
 }
 
 function registerUser() {
@@ -54,18 +80,16 @@ function registerUser() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message || 'Registration failed');
-    });
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || 'Registration failed');
+        });
 }
 
 function logoutUser() {
     fetch('/logout', { method: 'POST' })
         .then(() => {
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('register-form').style.display = 'block';
-            document.getElementById('logout-button').style.display = 'none';
+            checkLoginStatus();
             loadPosts();
         });
 }
@@ -78,11 +102,11 @@ function createPost() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content })
     })
-    .then(response => response.json())
-    .then(() => {
-        loadPosts();
-        document.getElementById('create-post-form').reset();
-    });
+        .then(response => response.json())
+        .then(() => {
+            loadPosts();
+            document.getElementById('create-post-form').reset();
+        });
 }
 
 function loadPosts() {
