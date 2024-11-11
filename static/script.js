@@ -58,6 +58,36 @@ function loginUser() {
         .catch(error => console.error('Error:', error));
 }
 
+function checkLoginStatus() {
+    fetch('/api/check-session')
+        .then(response => response.json())
+        .then(data => {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const logoutButton = document.getElementById('logout-button');
+            const blogSection = document.getElementById('blog-section');
+            const createPostForm = document.getElementById('create-post-form');
+
+            if (data.logged_in) {
+                // User is logged in
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'none';
+                logoutButton.style.display = 'block'; // Show logout button
+                blogSection.style.display = 'block'; // Show blog section
+                createPostForm.style.display = 'block'; // Show create post form
+            } else {
+                // User is not logged in
+                loginForm.style.display = 'block'; // Show login form
+                registerForm.style.display = 'block'; // Show register form
+                logoutButton.style.display = 'none'; // Hide logout button
+                blogSection.style.display = 'none'; // Hide blog section
+                createPostForm.style.display = 'none'; // Hide create post form
+            }
+        })
+        .catch(error => console.error('Error checking session:', error));
+}
+
+
 function registerUser() {
     const username = document.getElementById('register-username').value;
     const password = document.getElementById('register-password').value;
