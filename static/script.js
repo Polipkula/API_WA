@@ -124,11 +124,29 @@ function loadPosts() {
                     <p>${post.content}</p>
                     <small>By ${post.author} on ${new Date(post.created_at).toLocaleString()}</small>
                 `;
+                // Add a delete button if the user can delete the post
+                if (post.can_delete) {
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.onclick = () => deletePost(post.id);
+                    postDiv.appendChild(deleteButton);
+                }
                 postsDiv.appendChild(postDiv);
             });
         })
         .catch(error => console.error('Error fetching posts:', error));
 }
+
+function deletePost(postId) {
+    fetch(`/api/blog/${postId}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || 'Failed to delete post');
+            loadPosts();
+        })
+        .catch(error => console.error('Error deleting post:', error));
+}
+
 
 
 function checkLoginStatus() {

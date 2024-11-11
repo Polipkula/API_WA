@@ -80,6 +80,24 @@ def create_post():
     print(f"Post created: {new_post.content} by user_id {new_post.author_id}")
     return jsonify({'message': 'Post created successfully'}), 201
 
+@app.route('/api/blog/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    if 'user_id' not in session:
+        return jsonify({'message': 'Unauthorized'}), 401
+
+    post = BlogPost.query.get(post_id)
+    if not post:
+        return jsonify({'message': 'Post not found'}), 404
+
+    # Only allow the author to delete their own posts
+    if post.author_id != session['user_id']:
+        return jsonify({'message': 'Forbidden'}), 403
+
+    db.session.delete(post)
+    db.session.commit()
+    return jsonify({'message': 'Post deleted successfully'}), 200
+
+
 @app.route('/api/blog', methods=['GET'])
 def get_posts():
     if 'user_id' not in session:
@@ -98,17 +116,20 @@ def get_posts():
         else:
             author_name = author.username
         
-        # Only include posts the user is authorized to see
-        if session.get('is_admin') or post.author_id == session['user_id']:
-            result.append({
-                'id': post.id,
-                'content': post.content,
-                'author': author_name,
-                'created_at': post.created_at
-            })
+        # Include a flag to indicate if the current user can delete the post
+        can_delete = (post.author_id == session['user_id'])
+
+        result.append({
+            'id': post.id,
+            'content': post.content,
+            'author': author_name,
+            'created_at': post.created_at,
+            'can_delete': can_delete
+        })
 
     print(f"Posts fetched for user {session.get('user_id')}: {result}")
     return jsonify(result), 200
+
 
 
 @app.route('/api/blog/<int:post_id>', methods=['DELETE', 'PUT'])
