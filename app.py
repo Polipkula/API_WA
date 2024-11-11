@@ -126,5 +126,8 @@ def check_session():
         return jsonify({'logged_in': True, 'is_admin': session['is_admin'], 'username': session['username']}), 200
     return jsonify({'logged_in': False}), 200
 
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
