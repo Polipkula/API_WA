@@ -110,7 +110,12 @@ function loadPosts() {
         .then(response => response.json())
         .then(posts => {
             const postsDiv = document.getElementById('blog-posts');
-            postsDiv.innerHTML = '';
+            postsDiv.innerHTML = ''; // Clear previous posts
+
+            if (posts.length === 0) {
+                postsDiv.innerHTML = '<p>No posts available.</p>';
+                return;
+            }
 
             posts.forEach(post => {
                 const postDiv = document.createElement('div');
@@ -122,8 +127,9 @@ function loadPosts() {
                 postsDiv.appendChild(postDiv);
             });
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error fetching posts:', error));
 }
+
 
 function checkLoginStatus() {
     fetch('/api/check-session')

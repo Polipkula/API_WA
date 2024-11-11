@@ -75,6 +75,9 @@ def create_post():
     new_post = BlogPost(content=data['content'], author_id=session['user_id'])
     db.session.add(new_post)
     db.session.commit()
+
+    # Debug statement to check the new post
+    print(f"Post created: {new_post.content} by user_id {new_post.author_id}")
     return jsonify({'message': 'Post created successfully'}), 201
 
 @app.route('/api/blog', methods=['GET'])
@@ -84,17 +87,22 @@ def get_posts():
 
     posts = BlogPost.query.all()
     result = []
+
     for post in posts:
         author = User.query.get(post.author_id)
-        if session['is_admin'] or post.author_id == session['user_id'] or session['username'] in post.visible_to.split(','):
+        # Only include posts the user is authorized to see
+        if session['is_admin'] or post.author_id == session['user_id']:
             result.append({
                 'id': post.id,
                 'content': post.content,
                 'author': author.username,
-                'created_at': post.created_at,
-                'visible_to': post.visible_to.split(',')
+                'created_at': post.created_at
             })
+
+    # Debug statement to check fetched posts
+    print(f"Posts fetched for user {session.get('user_id')}: {result}")
     return jsonify(result), 200
+
 
 @app.route('/api/blog/<int:post_id>', methods=['DELETE', 'PUT'])
 def manage_post(post_id):
