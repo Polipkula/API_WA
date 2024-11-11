@@ -46,6 +46,7 @@ def register():
     db.session.commit()
     return jsonify({'message': 'User registered successfully'}), 201
 
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -161,6 +162,104 @@ def check_session():
     if 'user_id' in session:
         return jsonify({'logged_in': True, 'is_admin': session['is_admin'], 'username': session['username']}), 200
     return jsonify({'logged_in': False}), 200
+
+@app.route('/api/about', methods=['GET'])
+def api_documentation():
+    documentation = {
+        "endpoints": [
+            {
+                "method": "POST",
+                "endpoint": "/register",
+                "description": "Register a new user.",
+                "request_format": {
+                    "username": "string",
+                    "password": "string"
+                },
+                "response_format": {
+                    "message": "string"
+                },
+                "authorization": "No authorization required."
+            },
+            {
+                "method": "POST",
+                "endpoint": "/login",
+                "description": "Log in a user and create a session.",
+                "request_format": {
+                    "username": "string",
+                    "password": "string"
+                },
+                "response_format": {
+                    "message": "string"
+                },
+                "authorization": "No authorization required."
+            },
+            {
+                "method": "POST",
+                "endpoint": "/logout",
+                "description": "Log out the current user.",
+                "request_format": "None",
+                "response_format": {
+                    "message": "string"
+                },
+                "authorization": "Requires session."
+            },
+            {
+                "method": "POST",
+                "endpoint": "/api/blog",
+                "description": "Create a new blog post.",
+                "request_format": {
+                    "content": "string"
+                },
+                "response_format": {
+                    "message": "string"
+                },
+                "authorization": "Requires session."
+            },
+            {
+                "method": "GET",
+                "endpoint": "/api/blog",
+                "description": "Retrieve all blog posts. Includes a 'can_delete' flag if the logged-in user owns the post.",
+                "request_format": "None",
+                "response_format": [
+                    {
+                        "id": "integer",
+                        "content": "string",
+                        "author": "string",
+                        "created_at": "datetime",
+                        "can_delete": "boolean"
+                    }
+                ],
+                "authorization": "Requires session."
+            },
+            {
+                "method": "DELETE",
+                "endpoint": "/api/blog/<post_id>",
+                "description": "Delete a specific blog post.",
+                "request_format": "None",
+                "response_format": {
+                    "message": "string"
+                },
+                "authorization": "Requires session and user must own the post."
+            },
+            {
+                "method": "GET",
+                "endpoint": "/api/about",
+                "description": "Retrieve API documentation.",
+                "request_format": "None",
+                "response_format": "JSON containing all endpoints and their descriptions.",
+                "authorization": "No authorization required."
+            }
+        ],
+        "authorization": {
+            "description": "Authorization is based on session cookies.",
+            "process": [
+                "1. User logs in via /login and a session cookie is created.",
+                "2. This session cookie must be included in all subsequent requests to authorized endpoints.",
+                "3. If the session is invalid or expired, the user will receive a 401 Unauthorized response."
+            ]
+        }
+    }
+    return jsonify(documentation), 200
 
 with app.app_context():
     db.create_all()
