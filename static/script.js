@@ -93,12 +93,17 @@ function createPost() {
     })
         .then(response => response.json())
         .then(data => {
-            alert(data.message || 'Failed to create post');
-            loadPosts();
-            document.getElementById('create-post-form').reset();
+            if (data.message === 'Post created successfully') {
+                alert('Post created successfully');
+                loadPosts();
+                document.getElementById('create-post-form').reset();
+            } else {
+                alert(data.message || 'Failed to create post');
+            }
         })
         .catch(error => console.error('Error:', error));
 }
+
 
 function loadPosts() {
     fetch('/api/blog')

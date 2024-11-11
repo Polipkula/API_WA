@@ -69,8 +69,10 @@ def create_post():
         return jsonify({'message': 'Unauthorized'}), 401
 
     data = request.get_json()
-    visible_to = ",".join(data.get('visible_to', []))  # List of usernames
-    new_post = BlogPost(content=data['content'], author_id=session['user_id'], visible_to=visible_to)
+    if not data or not data.get('content'):
+        return jsonify({'message': 'Content is required'}), 400
+
+    new_post = BlogPost(content=data['content'], author_id=session['user_id'])
     db.session.add(new_post)
     db.session.commit()
     return jsonify({'message': 'Post created successfully'}), 201
